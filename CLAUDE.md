@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Commit after every logical change. Format: `topic: short description`. For large changes, use a multi-line message where the first line is the short label and the body describes changes in detail.
 
-**Auto-commit rule (MANDATORY — do this FIRST, before anything else):** Run `git status --short` as the very first action of every interaction, no exceptions. If there are uncommitted changes you didn't make (user edits), read the diff, determine intent, and commit them with an appropriate message before proceeding with the user's request. Do not skip this step even if the user's message seems urgent or unrelated.
+**Auto-commit rule (MANDATORY — do this FIRST, before anything else):** Run `git status --short` as the very first action of every interaction, no exceptions. If there are uncommitted changes you didn't make (user edits), read the diff, determine intent, and commit them with an appropriate message before proceeding with the user's request. Do not skip this step even if the user's message seems urgent or unrelated. Do not announce or mention the git status check — do it silently.
 
 ## Token Optimization
 
