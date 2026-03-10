@@ -32,11 +32,11 @@ On first run, you'll be prompted for your OBS WebSocket password and YouTube cha
 
 ## What It Monitors
 
-| Source | Data | Update Interval |
-|--------|------|-----------------|
-| **OBS** | Bitrate, FPS, dropped frames, CPU usage, memory | 1s |
-| **YouTube** | Live viewer count, live chat messages | 30s / live |
-| **GPU** | Utilisation %, GPU name | 2s |
+**OBS** — bitrate, FPS, dropped frames, CPU usage, memory (updates every 1s)
+
+**YouTube** — live viewer count and live chat messages (viewers every 30s, chat live)
+
+**GPU** — utilisation % and GPU name (updates every 2s)
 
 ## How It Works
 
@@ -45,8 +45,9 @@ On first run, you'll be prompted for your OBS WebSocket password and YouTube cha
 - Reads GPU stats from HWiNFO shared memory (Windows) or nvidia-smi (Linux)
 - Serves an embedded web UI with slot-machine number animations and auto-scrolling chat
 
-<details>
-<summary><strong>Architecture</strong></summary>
+## Architecture
+
+Each package runs as a goroutine, writing to shared state behind `sync.RWMutex`. The HTTP server reads snapshots and serves them as JSON.
 
 ```
 main.go                     → wires packages, starts goroutines
@@ -62,12 +63,7 @@ internal/
 static/                     → vanilla HTML/CSS/JS (embedded into binary)
 ```
 
-Each package runs as a goroutine, writing to shared state behind `sync.RWMutex`. The HTTP server reads snapshots and serves them as JSON.
-
-</details>
-
-<details>
-<summary><strong>Build Targets</strong></summary>
+## Building
 
 ```bash
 make          # vet + build → dist/stream_monitor.exe
@@ -80,18 +76,13 @@ make darwin   # cross-compile → dist/stream_monitor-darwin-arm64
 make clean    # remove dist/
 ```
 
-</details>
+## Platform Support
 
-<details>
-<summary><strong>Platform Support</strong></summary>
+**Windows** — full support, GPU via HWiNFO shared memory with nvidia-smi fallback
 
-| Platform | GPU Monitoring | Status |
-|----------|---------------|--------|
-| Windows | HWiNFO shared memory → nvidia-smi | Full support |
-| Linux | nvidia-smi → sysfs | Full support |
-| macOS | — | Builds, no GPU stats |
+**Linux** — full support, GPU via nvidia-smi with sysfs fallback
 
-</details>
+**macOS** — builds and runs, but no GPU monitoring yet
 
 ## License
 
