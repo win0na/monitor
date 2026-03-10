@@ -10,23 +10,19 @@ Single binary. No dependencies. No API keys.
 ## Quick Start
 
 ```bash
-make run
+mage run
 ```
 
 The dashboard starts at [localhost:8888](http://localhost:8888). Open it on your phone while streaming.
 
 ## Install
 
-**Prerequisites:** [Go 1.24+](https://go.dev/dl/) and GNU Make
+**Prerequisites:** [Go 1.24+](https://go.dev/dl/)
 
 ```bash
-# Windows
-winget install GnuWin32.Make
-powershell -Command '$p=[Environment]::GetEnvironmentVariable("Path","User"); [Environment]::SetEnvironmentVariable("Path","$p;C:\Program Files (x86)\GnuWin32\bin","User")'
-
-# Build
-make
-./dist/stream_monitor.exe
+go install github.com/magefile/mage@latest
+mage build
+./dist/stream_monitor.exe    # or .\dist\stream_monitor.exe on Windows
 ```
 
 On first run, you'll be prompted for your OBS WebSocket password and YouTube channel.
@@ -66,15 +62,18 @@ static/                     → vanilla HTML/CSS/JS (embedded into binary)
 
 ## Building
 
+Uses [Mage](https://magefile.org/) — a cross-platform build tool written in Go.
+
 ```bash
-make          # vet + build → dist/stream_monitor.exe
-make run      # build and run
-make test     # run all tests
-make fmt      # format code
-make lint     # staticcheck or go vet
-make linux    # cross-compile → dist/stream_monitor-linux-amd64
-make darwin   # cross-compile → dist/stream_monitor-darwin-arm64
-make clean    # remove dist/
+mage build    # compile for current platform
+mage run      # build and run
+mage test     # run all tests
+mage fmt      # format code
+mage lint     # staticcheck or go vet
+mage windows  # cross-compile → dist/stream_monitor-windows-amd64.exe
+mage linux    # cross-compile → dist/stream_monitor-linux-amd64
+mage darwin   # cross-compile → dist/stream_monitor-darwin-arm64
+mage clean    # remove dist/
 ```
 
 ## Platform Support

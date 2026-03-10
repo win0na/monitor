@@ -26,22 +26,24 @@ A real-time streaming dashboard that monitors OBS stats, YouTube live viewer cou
 
 ## Building & Running
 
+Build targets are defined in `magefile.go` using [Mage](https://magefile.org/) — a cross-platform build tool written in Go.
+
 ```bash
-make          # vet + build → dist/stream_monitor.exe
-make run      # build and run
-make test     # run all tests
-make vet      # go vet ./...
-make fmt      # gofmt -w .
-make lint     # staticcheck (falls back to go vet)
-make linux    # cross-compile → dist/stream_monitor-linux-amd64
-make darwin   # cross-compile → dist/stream_monitor-darwin-arm64
-make clean    # remove dist/
-make help     # show all targets
+mage build    # compile for current platform → dist/stream_monitor[.exe]
+mage run      # build and run
+mage test     # run all tests
+mage vet      # go vet ./...
+mage fmt      # gofmt -w .
+mage lint     # staticcheck (falls back to go vet)
+mage windows  # cross-compile → dist/stream_monitor-windows-amd64.exe
+mage linux    # cross-compile → dist/stream_monitor-linux-amd64
+mage darwin   # cross-compile → dist/stream_monitor-darwin-arm64
+mage clean    # remove dist/
 ```
 
-**Note:** `make` requires GNU Make. On Windows, install via `winget install GnuWin32.Make` or `choco install make`. GnuWin32 does not add `make` to PATH — run `powershell -Command '$p=[Environment]::GetEnvironmentVariable("Path","User"); [Environment]::SetEnvironmentVariable("Path","$p;C:\Program Files (x86)\GnuWin32\bin","User")'` then restart your terminal. Alternatively, use `go run .` directly.
+**Install Mage:** `go install github.com/magefile/mage@latest` (requires Go).
 
-Zero external dependencies — uses only the Go standard library. The server starts on port 8888. No YouTube API key is required — it scrapes public pages. Static files (HTML/CSS/JS) are embedded into the binary via `//go:embed`.
+The server starts on port 8888. No YouTube API key is required — it scrapes public pages. Static files (HTML/CSS/JS) are embedded into the binary via `//go:embed`.
 
 ## Project Structure
 
@@ -49,7 +51,7 @@ Zero external dependencies — uses only the Go standard library. The server sta
 stream_monitor/
 ├── main.go                          # entry point — wires packages, starts goroutines
 ├── go.mod
-├── Makefile
+├── magefile.go
 ├── CLAUDE.md
 ├── static/                          # embedded frontend (HTML/CSS/JS)
 │   ├── index.html
@@ -107,4 +109,4 @@ If you add new static files, you must add a corresponding route in `server.Run()
 GPU monitoring uses Go build tags for platform separation:
 - `internal/gpu/gpu_windows.go` (`//go:build windows`) — HWiNFO shared memory via `syscall`, falls back to `nvidia-smi`
 - `internal/gpu/gpu_linux.go` (`//go:build linux`) — `nvidia-smi`, falls back to `/sys/class/drm` sysfs
-- macOS (`make darwin`) — cross-compiles for `darwin/arm64`; no GPU monitoring implementation yet (build compiles but GPU stats are unavailable)
+- macOS (`mage darwin`) — cross-compiles for `darwin/arm64`; no GPU monitoring implementation yet (build compiles but GPU stats are unavailable)
