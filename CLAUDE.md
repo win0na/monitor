@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 > **MANDATORY FIRST ACTION — every interaction, no exceptions:**
-> Run `git status --short` before doing anything else. If there are uncommitted changes you didn't make, read the diff and ask the user if they'd like you to commit those changes (suggest an appropriate message). If there are no changes, proceed silently without mentioning the check.
+> Run `git status --short` before doing anything else. If there are no changes, proceed silently. If there are uncommitted user changes, complete the user's request first, then at the end ask if they'd like you to commit those changes along with any changes you made (suggest an appropriate message). Only commit if the user confirms.
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
