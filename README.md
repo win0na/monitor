@@ -22,6 +22,7 @@ The dashboard starts at [localhost:8888](http://localhost:8888). Open it on your
 ```bash
 # Windows
 winget install GnuWin32.Make
+# GnuWin32 doesn't add make to PATH — add C:\Program Files (x86)\GnuWin32\bin to your system PATH
 
 # Build
 make
