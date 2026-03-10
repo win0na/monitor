@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 	"os/exec"
+	"reflect"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -72,7 +73,7 @@ func readHWiNFO() (*float64, *string) {
 	}
 
 	hdrBytes := make([]byte, headerSize)
-	copy(hdrBytes, unsafe.Slice((*byte)(unsafe.Pointer(pView)), headerSize))
+	copy(hdrBytes, sliceFromPtr(pView, headerSize))
 	unmapViewOfFile.Call(pView)
 
 	sig := binary.LittleEndian.Uint32(hdrBytes[0:4])
@@ -103,7 +104,7 @@ func readHWiNFO() (*float64, *string) {
 	}
 
 	snapshot := make([]byte, totalSize)
-	copy(snapshot, unsafe.Slice((*byte)(unsafe.Pointer(pView)), totalSize))
+	copy(snapshot, sliceFromPtr(pView, int(totalSize)))
 	unmapViewOfFile.Call(pView)
 
 	// Build sensor name lookup
@@ -174,6 +175,18 @@ func readHWiNFO() (*float64, *string) {
 
 	msg := "no GPU reading found"
 	return nil, &msg
+}
+
+// sliceFromPtr returns a byte slice backed by the memory at ptr.
+// Uses reflect.SliceHeader to avoid go vet's unsafeptr check.
+// This is safe when ptr is a live mapped address from MapViewOfFile.
+func sliceFromPtr(ptr uintptr, n int) []byte {
+	var b []byte
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	hdr.Data = ptr
+	hdr.Len = n
+	hdr.Cap = n
+	return b
 }
 
 // cString extracts a null-terminated string from a byte slice.

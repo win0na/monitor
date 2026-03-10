@@ -37,7 +37,7 @@ type wsConn struct {
 
 // wsConnect performs the HTTP upgrade handshake and returns a connected wsConn.
 func wsConnect(host string, port int) (*wsConn, error) {
-	addr := fmt.Sprintf("%s:%d", host, port)
+	addr := net.JoinHostPort(host, fmt.Sprintf("%d", port))
 	conn, err := net.DialTimeout("tcp", addr, 10*time.Second)
 	if err != nil {
 		return nil, err
