@@ -36,7 +36,7 @@ make clean    # remove dist/
 make help     # show all targets
 ```
 
-**Note:** `make` requires GNU Make. On Windows, install via `choco install make` or `winget install GnuWin32.Make`. Alternatively, use `go run .` directly.
+**Note:** `make` requires GNU Make. On Windows, install via `winget install GnuWin32.Make` or `choco install make`. Alternatively, use `go run .` directly.
 
 Zero external dependencies — uses only the Go standard library. The server starts on port 8888. No YouTube API key is required — it scrapes public pages. Static files (HTML/CSS/JS) are embedded into the binary via `//go:embed`.
 
