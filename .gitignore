@@ -1,0 +1,15 @@
+# Build output
+dist/
+*.exe
+*.out
+
+# Config (contains passwords)
+*config.json
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

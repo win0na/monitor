@@ -1,0 +1,680 @@
+/*
+ * Stream Monitor — Main Stylesheet
+ *
+ * Layout: two-column desktop (stats left, chat right),
+ * single-column stack on mobile (<900px).
+ *
+ * Uses CSS custom properties for theming (dark default,
+ * light via prefers-color-scheme).
+ */
+
+/* ── Theme Variables ───────────────────────────────────────────────────────── */
+
+:root {
+  --bg:      #0a0b0d;
+  --surface: #111316;
+  --border:  #1e2228;
+  --obs:     #00cc66;
+  --yt:      #ff4444;
+  --warn:    #ffd166;
+  --crit:    #ff4d6d;
+  --text:    #e0e6ef;
+  --muted:   #4a5568;
+  --mono:    'Share Tech Mono', monospace;
+  --ui:      'Barlow Condensed', sans-serif;
+  --chat:    'Barlow', sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:      #f0f2f5;
+    --surface: #ffffff;
+    --border:  #d0d5de;
+    --obs:     #008844;
+    --yt:      #cc0000;
+    --warn:    #b07800;
+    --crit:    #cc1133;
+    --text:    #1a1e28;
+    --muted:   #7a8499;
+  }
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ui);
+}
+
+/* ── Desktop Layout (>= 900px) ─────────────────────────────────────────────
+   Left column : preview + header + stats
+   Right column: chat (full height)
+──────────────────────────────────────────────────────────────────────────── */
+
+body {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.right-col {
+  flex: 0 0 340px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Stream Preview ────────────────────────────────────────────────────────── */
+
+/* Preview fills all remaining vertical space in the left column.
+   The YouTube iframe handles its own 16:9 aspect ratio internally;
+   any excess area is filled by the black background. */
+.preview {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.preview iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.preview-offline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-offline-icon {
+  font-size: 28px;
+  opacity: .2;
+}
+
+.preview-offline-txt {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── Header Bar ────────────────────────────────────────────────────────────── */
+
+.hdr {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.badge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge:last-child {
+  justify-content: flex-end;
+}
+
+/* Status indicator dot (OBS / YouTube) */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+  transition: background .3s;
+}
+
+.dot.live {
+  background: var(--yt);
+  box-shadow: 0 0 7px var(--yt);
+  animation: pulse 1.5s infinite;
+}
+
+.dot.obs-on {
+  background: var(--obs);
+  box-shadow: 0 0 7px var(--obs);
+}
+
+.dot.yt-on {
+  background: var(--yt);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .3; }
+}
+
+/* Badge text rendered via ::before so it is not user-selectable */
+.badge-txt {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.badge-txt::before { content: attr(data-label); }
+
+.badge-txt.obs-on  { color: var(--obs); }
+.badge-txt.yt-live { color: var(--yt); }
+.badge-txt.yt-on   { color: #ff8080; }
+
+
+/* ── Stats Grid ────────────────────────────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+
+.stat {
+  background: var(--surface);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 76px;
+  /* Vertical divider via inset shadow */
+  box-shadow: inset -1px 0 0 var(--border);
+}
+
+.stat:nth-child(3n)  { box-shadow: none; }
+.stat.full           { box-shadow: none; }
+.stat:nth-child(n+4) { border-top: 1px solid var(--border); }
+
+/* Show red top border only when YouTube is live */
+.stats.yt-live {
+  border-top: 3px solid var(--yt);
+}
+
+/* Server-lost dimmed state */
+.stats.server-lost {
+  row-gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+}
+
+.stat.server-lost {
+  border-top: none;
+  border-bottom: none;
+}
+
+.stat.server-lost .sv {
+  opacity: .35;
+}
+
+.stat.server-lost .sl::after {
+  content: ' —';
+  opacity: .5;
+}
+
+/* Bitrate card: flush bar at bottom */
+#c-bit {
+  padding-bottom: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Full-width stat row */
+.stat.full {
+  grid-column: 1 / -1;
+}
+
+/* Value + unit on the same baseline */
+.sv-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.su-inline {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* ── Per-Digit Slot Machine Animation ──────────────────────────────────────
+   Each .sv holds .dslot spans (one per character).
+   Fixed-height .dslot means .sv never changes height = zero layout reflow.
+   Only characters that differ animate; direction follows value change.
+──────────────────────────────────────────────────────────────────────────── */
+
+.sv {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.dslot {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.1em;
+  line-height: 1.1em;
+  vertical-align: middle;
+}
+
+.dslot-inner {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1em;
+}
+
+.dslot-inner span {
+  display: block;
+  line-height: 1.1em;
+}
+
+/* ── Duration — responsive, hides seconds when narrow ──────────────────── */
+
+.dur-row {
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 2px 4px;
+  overflow: hidden;
+}
+
+/* Seconds digits rendered slightly smaller than hours/minutes.
+   Shrink first and collapse entirely when the card is too narrow. */
+#dur-s, .dur-su-s {
+  flex-shrink: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
+#dur-s {
+  font-size: 22px;
+}
+
+#c-dur {
+  container-type: inline-size;
+}
+
+@container (max-width: 100px) {
+  #dur-s, .dur-su-s {
+    display: none !important;
+  }
+}
+
+/* Stat label — never wraps to avoid breaking card layout.
+   Text lives in ::before so it is not user-selectable. */
+.sl {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#c-viewers .sl::before { content: "Viewers"; }
+#c-dur     .sl::before { content: "Duration"; }
+#c-bit     .sl::before { content: "Bitrate "; }
+#c-bit     .sl::after  { content: "kb/s"; opacity: .6; }
+#c-cpu     .sl::before { content: "CPU"; }
+#c-gpu     .sl::before { content: "GPU"; }
+#c-fps     .sl::before { content: "FPS "; }
+
+#c-fps .sl::after  { content: attr(data-drop); opacity: .6; }
+#c-gpu .sl.gpu-na::before { content: "GPU (n/a)"; }
+
+/* Stat value */
+.sv {
+  font-family: var(--mono);
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--text);
+  transition: color .3s;
+  font-weight: 700;
+}
+
+.sv.warn { color: var(--warn); }
+.sv.crit { color: var(--crit); }
+
+/* Stat unit */
+.su {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Bitrate bar */
+.bbar-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.bbar {
+  height: 100%;
+  width: 0%;
+  background: var(--obs);
+  transition: width .5s, background .3s;
+}
+
+/* ── Refresh Bar ───────────────────────────────────────────────────────────── */
+
+.rbar {
+  height: 2px;
+  background: var(--border);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.rprog {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--obs);
+  opacity: .35;
+  width: 0%;
+  animation: rfill 1.5s linear infinite;
+}
+
+@keyframes rfill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* ── Chat Panel ────────────────────────────────────────────────────────────── */
+
+.chat-wrap {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.chat-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-hdr-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Chat header label rendered via ::before so it is not user-selectable */
+.chat-hdr-label {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.chat-hdr-label::before { content: attr(data-label); }
+
+.chat-hdr-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.chat-count {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.chat-err {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--crit);
+  letter-spacing: .5px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-feed::-webkit-scrollbar       { width: 4px; }
+.chat-feed::-webkit-scrollbar-track  { background: transparent; }
+.chat-feed::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 2px; }
+
+/* ── Chat reconnect overlay ──────────────────────────────────────────── */
+
+.chat-reconnect {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.chat-reconnect-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-reconnect-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: pulse 1.5s infinite;
+}
+
+.chat-reconnect-label {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chat-wrap.server-lost .chat-feed {
+  opacity: 0.35;
+}
+
+.chat-wrap.server-lost .chat-reconnect {
+  display: flex;
+}
+
+/* Chat message row */
+.msg {
+  padding: 6px 8px;
+  border-bottom: 1px solid transparent;
+  line-height: 1.45;
+}
+
+.msg:nth-child(even) {
+  background: rgba(128, 128, 128, .07);
+}
+
+/* Message timestamp */
+.msg-time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: 8px;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+
+/* ── Chat reconnect divider ────────────────────────────────────────────── */
+
+.chat-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chat-divider::before,
+.chat-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Author name (coloured by role) */
+.msg-author {
+  font-family: var(--chat);
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.msg-author.owner  { color: #ffd166; }
+.msg-author.mod    { color: #4fc3f7; }
+.msg-author.member { color: #ce93d8; }
+.msg-author.user   { color: #78909c; }
+
+/* Message text */
+.msg-text {
+  font-family: var(--chat);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  word-break: break-word;
+}
+
+/* Inline chat emojis */
+.chat-emoji {
+  height: 1.3em;
+  width: auto;
+  vertical-align: middle;
+  margin: 0 1px;
+  object-fit: contain;
+}
+
+.chat-empty {
+  padding: 24px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/* ── Mobile Layout (< 900px) ───────────────────────────────────────────────
+   Single column vertical stack
+──────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 899px) {
+  body {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .left-col {
+    flex: 0 0 auto;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* On mobile the preview reverts to 16:9 aspect ratio so
+     it doesn't consume all vertical space. */
+  .preview {
+    flex: 0 0 auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .right-col {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Hide scrollbar on mobile */
+  .chat-feed::-webkit-scrollbar { display: none; }
+  .chat-feed { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ── Large Desktop (>= 1400px) — wider stats values ────────────────────── */
+
+@media (min-width: 1400px) {
+  .sv     { font-size: 40px; }
+  #dur-s  { font-size: 28px; }
+  .stat   { min-height: 84px; }
+}
