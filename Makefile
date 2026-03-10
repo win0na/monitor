@@ -1,3 +1,4 @@
+SHELL   := bash
 APP     := stream_monitor
 MODULE  := stream_monitor
 GOFLAGS :=
