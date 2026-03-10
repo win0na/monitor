@@ -14,6 +14,7 @@ all: vet build
 ## build: compile for current platform
 build:
 	@mkdir -p $(DIST)
+	@rm -f $(DIST)/$(APP).exe
 	go build $(GOFLAGS) -o $(DIST)/$(APP).exe .
 
 ## run: build and run
@@ -44,11 +45,13 @@ lint:
 ## linux: cross-compile for Linux amd64
 linux:
 	@mkdir -p $(DIST)
+	@rm -f $(DIST)/$(APP)-linux-amd64
 	GOOS=linux GOARCH=amd64 go build $(GOFLAGS) -o $(DIST)/$(APP)-linux-amd64 .
 
 ## darwin: cross-compile for macOS arm64
 darwin:
 	@mkdir -p $(DIST)
+	@rm -f $(DIST)/$(APP)-darwin-arm64
 	GOOS=darwin GOARCH=arm64 go build $(GOFLAGS) -o $(DIST)/$(APP)-darwin-arm64 .
 
 ## clean: remove build artifacts
