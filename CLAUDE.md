@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git Conventions
+
+Commit after every logical change. Format: `topic: short description`. For large changes, use a multi-line message where the first line is the short label and the body describes changes in detail. Always include `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`.
+
 ## Token Optimization
 
 **CRITICAL — apply to every interaction:**
