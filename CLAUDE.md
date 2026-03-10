@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 > **MANDATORY FIRST ACTION — every interaction, no exceptions:**
-> Run `git status --short` before doing anything else. If there are uncommitted changes you didn't make, read the diff, determine intent, and commit them with an appropriate message before proceeding. Never skip this. Never announce it — do it silently.
+> Run `git status --short` before doing anything else. If there are uncommitted changes you didn't make, read the diff and ask the user if they'd like you to commit those changes (suggest an appropriate message). If there are no changes, proceed silently without mentioning the check.
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
