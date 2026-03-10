@@ -19,7 +19,7 @@ Commit after every logical change. Format: `topic: short description`. For large
 
 ## What This Is
 
-A real-time streaming dashboard that monitors OBS stats, YouTube live viewer counts/chat, and GPU utilisation. It compiles to a single native binary (Windows/Linux) with no runtime dependencies. Serves a responsive web UI designed for phone use during streams.
+A real-time streaming dashboard that monitors OBS stats, YouTube live viewer counts/chat, and GPU utilisation. It compiles to a single native binary (Windows/Linux/macOS) with no runtime dependencies. Serves a responsive web UI designed for phone use during streams.
 
 ## Building & Running
 
@@ -36,11 +36,7 @@ make clean    # remove dist/
 make help     # show all targets
 ```
 
-Or run directly:
-
-```bash
-go run .
-```
+**Note:** `make` requires GNU Make. On Windows, install via `choco install make` or `winget install GnuWin32.Make`. Alternatively, use `go run .` directly.
 
 Zero external dependencies — uses only the Go standard library. The server starts on port 8888. No YouTube API key is required — it scrapes public pages. Static files (HTML/CSS/JS) are embedded into the binary via `//go:embed`.
 
@@ -108,3 +104,4 @@ If you add new static files, you must add a corresponding route in `server.Run()
 GPU monitoring uses Go build tags for platform separation:
 - `internal/gpu/gpu_windows.go` (`//go:build windows`) — HWiNFO shared memory via `syscall`, falls back to `nvidia-smi`
 - `internal/gpu/gpu_linux.go` (`//go:build linux`) — `nvidia-smi`, falls back to `/sys/class/drm` sysfs
+- macOS (`make darwin`) — cross-compiles for `darwin/arm64`; no GPU monitoring implementation yet (build compiles but GPU stats are unavailable)
