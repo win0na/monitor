@@ -29,19 +29,35 @@ A real-time streaming dashboard that monitors OBS stats, YouTube live viewer cou
 Build targets are defined in `magefile.go` using [Mage](https://magefile.org/) — a cross-platform build tool written in Go.
 
 ```bash
-mage build    # compile for current platform → dist/stream_monitor[.exe]
-mage run      # build and run
-mage test     # run all tests
-mage vet      # go vet ./...
-mage fmt      # gofmt -w .
-mage lint     # staticcheck (falls back to go vet)
-mage windows  # cross-compile → dist/stream_monitor-windows-amd64.exe
-mage linux    # cross-compile → dist/stream_monitor-linux-amd64
-mage darwin   # cross-compile → dist/stream_monitor-darwin-arm64
-mage clean    # remove dist/
+mage build      # compile for current platform → dist/stream_monitor[.exe]
+mage run        # build and run
+mage test       # run all tests
+mage vet        # go vet ./...
+mage fmt        # gofmt -w .
+mage lint       # golangci-lint → staticcheck → go vet (first available)
+mage coverage   # go test -cover ./...
+mage windows    # cross-compile → dist/stream_monitor-windows-amd64.exe
+mage linux      # cross-compile → dist/stream_monitor-linux-amd64
+mage darwin     # cross-compile → dist/stream_monitor-darwin-arm64
+mage clean      # remove dist/
 ```
 
 **Install Mage:** `go install github.com/magefile/mage@latest` (requires Go).
+
+## Development Setup
+
+After cloning, install optional tooling for the best development experience:
+
+```bash
+go install github.com/magefile/mage@latest                          # build system (required)
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest  # linter (recommended)
+go install github.com/evilmartians/lefthook@latest                  # git hooks (recommended)
+lefthook install                                                     # activate pre-commit/pre-push hooks
+```
+
+**Pre-commit hooks** (via lefthook): `gofmt` and `go vet` run on staged files before every commit. `golangci-lint` and `go test` run before every push.
+
+**CI pipeline** (GitHub Actions): runs lint, test, vet, and cross-compile builds on every push to `main` and on pull requests. Config: `.github/workflows/ci.yml`.
 
 The server starts on port 8888. No YouTube API key is required — it scrapes public pages. Static files (HTML/CSS/JS) are embedded into the binary via `//go:embed`.
 

@@ -1,0 +1,23 @@
+pre-commit:
+  parallel: true
+  commands:
+    fmt:
+      glob: "*.go"
+      run: gofmt -l {staged_files} | xargs -r gofmt -w
+      stage_fixed: true
+    vet:
+      glob: "*.go"
+      run: go vet ./...
+
+pre-push:
+  commands:
+    lint:
+      glob: "*.go"
+      run: |
+        if command -v golangci-lint >/dev/null 2>&1; then
+          golangci-lint run ./...
+        else
+          echo "golangci-lint not installed, skipping lint"
+        fi
+    test:
+      run: go test ./...

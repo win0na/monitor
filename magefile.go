@@ -107,13 +107,22 @@ func Fmt() error {
 	return sh.RunV("gofmt", "-w", ".")
 }
 
-// Lint runs staticcheck if available, falls back to go vet.
+// Lint runs golangci-lint if available, falls back to staticcheck, then go vet.
 func Lint() error {
+	if _, err := exec.LookPath("golangci-lint"); err == nil {
+		return sh.RunV("golangci-lint", "run", "./...")
+	}
+	fmt.Println("golangci-lint not found, trying staticcheck")
 	if _, err := exec.LookPath("staticcheck"); err == nil {
 		return sh.RunV("staticcheck", "./...")
 	}
 	fmt.Println("staticcheck not found, running go vet instead")
 	return Vet()
+}
+
+// Coverage runs tests with coverage reporting.
+func Coverage() error {
+	return sh.RunV("go", "test", "-cover", "./...")
 }
 
 // Clean removes build artifacts.

@@ -1,0 +1,53 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  default: standard
+  enable:
+    - bodyclose      # unclosed HTTP response bodies
+    - dupword        # duplicate words in comments
+    - gocritic       # opinionated code checks
+    - gosec          # security checks
+    - misspell       # typos in comments and strings (respects British English)
+    - nilerr         # returning nil instead of error
+    - prealloc       # suggest slice preallocation
+    - revive         # extensible linter (golint successor)
+    - unconvert      # unnecessary type conversions
+    - unparam        # unused function parameters
+    - whitespace     # unnecessary blank lines
+
+  settings:
+    gosec:
+      excludes:
+        - G103 # unsafe.Pointer — intentional in GPU monitoring code
+        - G115 # integer overflow — intentional in WebSocket frame parsing
+        - G204 # subprocess with variable args — intentional nvidia-smi calls
+        - G304 # file path from variable — intentional sysfs reads in GPU code
+    revive:
+      rules:
+        - name: exported
+        - name: var-naming
+        - name: indent-error-flow
+        - name: error-return
+    gocritic:
+      enabled-checks:
+        - rangeValCopy
+
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+          - unparam
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - stream_monitor
