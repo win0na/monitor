@@ -6,6 +6,9 @@ dist/
 # Config (contains passwords)
 *config.json
 
+# Claude Code (local-only settings)
+.claude/settings.local.json
+
 # IDE / OS
 .vscode/
 .idea/
