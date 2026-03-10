@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Commit after every logical change. Format: `topic: short description`. For large changes, use a multi-line message where the first line is the short label and the body describes changes in detail.
 
+**Auto-commit rule:** At the start of every interaction, check `git status`. If there are uncommitted changes you didn't make (user edits), read the diff, determine intent, and commit them with an appropriate message before proceeding with the user's request.
+
 ## Token Optimization
 
 **CRITICAL — apply to every interaction:**
