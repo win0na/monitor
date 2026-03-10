@@ -79,7 +79,7 @@ mage clean    # remove dist/
 
 **Linux** — full support, GPU via nvidia-smi with sysfs fallback
 
-**macOS** — builds and runs, but no GPU monitoring yet
+**macOS** — full support, GPU via IOKit (`ioreg`) with `powermetrics` fallback
 
 ## License
 

@@ -65,7 +65,8 @@ stream_monitor/
     ├── gpu/
     │   ├── gpu.go                   # common polling loop
     │   ├── gpu_windows.go           # HWiNFO shared memory → nvidia-smi fallback
-    │   └── gpu_linux.go             # nvidia-smi → sysfs fallback
+    │   ├── gpu_linux.go             # nvidia-smi → sysfs fallback
+    │   └── gpu_darwin.go            # IOKit (ioreg) → powermetrics fallback
     └── server/server.go             # HTTP server, static file routes, /stats endpoint
 ```
 
@@ -77,7 +78,7 @@ Single Go module with domain logic split into `internal/` packages. `main.go` wi
 
 - `internal/obs` — WebSocket v5 connection to OBS via raw TCP sockets (RFC 6455); polls stats every 1s, computes rolling 5s bitrate average; auto-reconnects with 3s backoff
 - `internal/youtube` — accepts channel handles (`@handle`), video IDs, or full YouTube URLs; validates input at startup; scrapes `/@handle/live` or monitors a video directly; polls viewer count every 30s; live chat via innertube API scraping
-- `internal/gpu` — common polling loop; platform-specific implementations in `gpu_windows.go` (HWiNFO shared memory → nvidia-smi fallback) and `gpu_linux.go` (nvidia-smi → sysfs fallback)
+- `internal/gpu` — common polling loop; platform-specific implementations in `gpu_windows.go` (HWiNFO shared memory → nvidia-smi fallback), `gpu_linux.go` (nvidia-smi → sysfs fallback), and `gpu_darwin.go` (IOKit via ioreg → powermetrics fallback)
 - `internal/server` — `net/http` server; serves embedded static files and `/stats` JSON endpoint
 - `internal/config` — persists OBS password and YouTube input (handle/video ID/URL) to `stream_monitor_config.json`
 - `internal/state` — shared state structs (`OBSState`, `YTState`, `GPUState`) with `sync.RWMutex` for safe concurrent access
@@ -109,4 +110,4 @@ If you add new static files, you must add a corresponding route in `server.Run()
 GPU monitoring uses Go build tags for platform separation:
 - `internal/gpu/gpu_windows.go` (`//go:build windows`) — HWiNFO shared memory via `syscall`, falls back to `nvidia-smi`
 - `internal/gpu/gpu_linux.go` (`//go:build linux`) — `nvidia-smi`, falls back to `/sys/class/drm` sysfs
-- macOS (`mage darwin`) — cross-compiles for `darwin/arm64`; no GPU monitoring implementation yet (build compiles but GPU stats are unavailable)
+- `internal/gpu/gpu_darwin.go` (`//go:build darwin`) — IOKit via `ioreg` (Apple Silicon & Intel), falls back to `powermetrics` (requires sudo)
