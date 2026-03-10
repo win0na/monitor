@@ -9,23 +9,20 @@ Single binary. No dependencies. No API keys.
 
 ## Quick Start
 
-```bash
-mage run
-```
+Download and run the latest binary from [Releases](https://github.com/winneon/stream_monitor/releases).
 
-The dashboard starts at [localhost:8888](http://localhost:8888). Open it on your phone while streaming.
+The dashboard starts at [localhost:8888](http://localhost:8888). On first run, you'll be prompted for your OBS WebSocket password and YouTube channel.
 
-## Install
+## Building from Source
 
 **Prerequisites:** [Go 1.24+](https://go.dev/dl/)
 
 ```bash
 go install github.com/magefile/mage@latest
 mage build
-./dist/stream_monitor.exe    # or .\dist\stream_monitor.exe on Windows
 ```
 
-On first run, you'll be prompted for your OBS WebSocket password and YouTube channel.
+The binary is output to `dist/stream_monitor[.exe]`.
 
 ## What It Monitors
 
