@@ -5,9 +5,9 @@
 //
 // Usage:
 //
-//	go run .
-//	# or build and run:
-//	go build -o stream_monitor.exe . && ./stream_monitor.exe
+//	make run
+//	# or build then run:
+//	make && ./dist/stream_monitor.exe
 package main
 
 import (
