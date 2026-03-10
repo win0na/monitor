@@ -58,7 +58,7 @@ func wsConnect(host string, port int) (*wsConn, error) {
 		addr, key,
 	)
 	if _, err := conn.Write([]byte(handshake)); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func wsConnect(host string, port int) (*wsConn, error) {
 	for {
 		n, err := conn.Read(tmp)
 		if err != nil {
-			conn.Close()
+			_ = conn.Close()
 			return nil, fmt.Errorf("server closed during handshake")
 		}
 		buf = append(buf, tmp[:n]...)
@@ -78,7 +78,7 @@ func wsConnect(host string, port int) (*wsConn, error) {
 	}
 
 	if len(buf) < 12 || string(buf[:12]) != "HTTP/1.1 101" {
-		conn.Close()
+		_ = conn.Close()
 		return nil, fmt.Errorf("handshake failed: %s", string(buf[:min(80, len(buf))]))
 	}
 
@@ -117,12 +117,13 @@ func (ws *wsConn) send(text string) error {
 	frame = append(frame, 0x81) // FIN + text opcode
 
 	length := len(data)
-	if length < 126 {
+	switch {
+	case length < 126:
 		frame = append(frame, byte(0x80|length))
-	} else if length < 65536 {
+	case length < 65536:
 		frame = append(frame, 0xFE)
 		frame = append(frame, byte(length>>8), byte(length))
-	} else {
+	default:
 		frame = append(frame, 0xFF)
 		b := make([]byte, 8)
 		binary.BigEndian.PutUint64(b, uint64(length))
@@ -166,13 +167,14 @@ func (ws *wsConn) recv() (string, error) {
 	isMasked := header[1]&0x80 != 0
 	length := int(header[1] & 0x7F)
 
-	if length == 126 {
+	switch length {
+	case 126:
 		ext, err := ws.recvExact(2)
 		if err != nil {
 			return "", err
 		}
 		length = int(binary.BigEndian.Uint16(ext))
-	} else if length == 127 {
+	case 127:
 		ext, err := ws.recvExact(8)
 		if err != nil {
 			return "", err
@@ -227,12 +229,12 @@ func (ws *wsConn) sendPong(payload []byte) {
 		masked[i] = b ^ mask[i%4]
 	}
 
-	var frame []byte
+	frame := make([]byte, 0, 2+len(mask)+len(masked))
 	frame = append(frame, 0x8A) // FIN + pong
 	frame = append(frame, byte(0x80|len(payload)))
 	frame = append(frame, mask...)
 	frame = append(frame, masked...)
-	ws.conn.Write(frame)
+	_, _ = ws.conn.Write(frame)
 }
 
 // close sends a close frame and shuts down the socket.
@@ -246,8 +248,8 @@ func (ws *wsConn) close() {
 	ws.closed = true
 	mask := make([]byte, 4)
 	rand.Read(mask)
-	ws.conn.Write(append([]byte{0x88, 0x80}, mask...))
-	ws.conn.Close()
+	_, _ = ws.conn.Write(append([]byte{0x88, 0x80}, mask...))
+	_ = ws.conn.Close()
 }
 
 // ── OBS authentication ─────────────────────────────────────────────────────
@@ -263,8 +265,7 @@ func computeAuth(password, salt, challenge string) string {
 // ── OBS request/response ────────────────────────────────────────────────────
 
 type obsPending struct {
-	ch  chan map[string]any
-	res map[string]any
+	ch chan map[string]any
 }
 
 var (
@@ -290,7 +291,7 @@ func obsRequest(ws *wsConn, requestType string) map[string]any {
 			"requestData": map[string]any{},
 		},
 	})
-	ws.send(string(msg))
+	_ = ws.send(string(msg))
 
 	select {
 	case res := <-p.ch:
@@ -452,7 +453,7 @@ func Run(password string, s *state.OBSState) {
 			}
 
 			identifyJSON, _ := json.Marshal(identify)
-			ws.send(string(identifyJSON))
+			_ = ws.send(string(identifyJSON))
 
 			// Read Identified response (op 2)
 			raw, err = ws.recv()

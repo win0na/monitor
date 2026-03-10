@@ -42,7 +42,7 @@ func Save(cfg map[string]string) {
 		return
 	}
 	p := configPath()
-	if err := os.WriteFile(p, data, 0644); err == nil {
+	if err := os.WriteFile(p, data, 0o600); err == nil {
 		fmt.Printf("  ✓ Settings saved to %s\n", p)
 	}
 }
@@ -65,7 +65,7 @@ func Prompt(label, saved string, secret bool) string {
 	}
 
 	var line string
-	fmt.Scanln(&line)
+	_, _ = fmt.Scanln(&line)
 	line = strings.TrimSpace(line)
 	if line == "" {
 		return saved

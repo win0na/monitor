@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"stream_monitor/internal/state"
 )
@@ -46,7 +47,7 @@ func Run(port int, staticFS fs.FS, obs *state.OBSState, yt *state.YTState, gpu *
 	})
 
 	addr := fmt.Sprintf("0.0.0.0:%d", port)
-	server := &http.Server{Addr: addr, Handler: mux}
+	server := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 10 * time.Second}
 
 	for {
 		err := server.ListenAndServe()
@@ -73,7 +74,7 @@ func serveStatic(w http.ResponseWriter, staticFS fs.FS, filepath string) {
 	w.Header().Set("Content-Type", ct)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
 	w.Header().Set("Cache-Control", "no-store")
-	w.Write(data)
+	_, _ = w.Write(data)
 }
 
 // serveStats serializes current monitor state as JSON and sends it.
@@ -92,5 +93,5 @@ func serveStats(w http.ResponseWriter, obs *state.OBSState, yt *state.YTState, g
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(body)))
-	w.Write(body)
+	_, _ = w.Write(body)
 }

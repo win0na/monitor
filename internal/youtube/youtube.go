@@ -42,7 +42,7 @@ func ytFetch(url string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -160,7 +160,7 @@ func fetchInnertubeViewers(videoID string) *string {
 	if err != nil {
 		return nil
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -625,7 +625,7 @@ func RunChat(ytInput string, s *state.YTState) {
 			}
 
 			body, err := io.ReadAll(resp.Body)
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			if err != nil {
 				time.Sleep(3 * time.Second)
 				continue
